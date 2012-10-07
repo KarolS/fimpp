@@ -19,20 +19,22 @@ Anyway, to run the interpreter with given FIM++ source file from your command li
 Compilation
 ----------
 
-You will need Scala compiler from [Scala's website](http://www.scala-lang.org/downloads). JDK would also come in handy.
+You will need Scala compiler from [Scala's website](http://www.scala-lang.org/downloads) and JDK.
+
+The easiest way is to use the provided makefile:
+
+    $ make
+
+And that's all! A freshly compiled JAR lands in your bin directory!
+
+If you want to compile it manually (e.g. no _make_ on your system), follow these steps:
 
     $ mkdir target
     $ scalac -d target src/stasiak/karol/fimpp/*
     $ cd target
-    $ jar cfe fimpp.jar stasiak.karol.fimpp.Main stasiak
+    $ jar cfe ../bin/fimpp.jar stasiak.karol.fimpp.Main stasiak
     
-To run it, simply use Scala or Java:
-
-    $ scala fimpp.jar <FIM++ script file>
-    or
-    $ java --cp /path/to/scala-library.jar:fimpp.jar stasiak.karol.fimpp.Main <FIM++ script file>
-
-or copy it into the bin directory in place of the old one and use the scripts.
+(By the way, the steps above should also work on Windows.)
      
 Examples
 --------
