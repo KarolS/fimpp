@@ -53,5 +53,5 @@ Arrays are dynamically growing lists of any kinds of values. They are indexed fr
 Nothing
 ------
 
-This is the value that is returned from reading arrays from uninitialized cells and from some other places. It has no literal, so you can't even check if you got it.
+This is the value that is returned from reading arrays from uninitialized cells and from some other places. It has no literal, but there are conditional expression that allow you to check against it.
 

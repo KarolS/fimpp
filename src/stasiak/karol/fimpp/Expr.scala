@@ -21,6 +21,9 @@ case class ListExpression(elems: List[Expr]) extends Expr {
 case class VariableValue(ident: String) extends Expr {
   def eval(context: Context) = context.get(ident)
 }
+case object NullValue extends Expr {
+  def eval(context: Context) = RuntimeNull
+}
 case class FunctionCall(function: String, args: List[Expr])  extends Expr {
   def eval(context: Context) = {
     context.get(function) match {

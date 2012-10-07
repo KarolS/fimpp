@@ -131,7 +131,7 @@ case class RepeatStat(times: Long, body:List[Statement], catchBody: Option[List[
 }
 
 case class PrintStat(expr: Expr) extends Statement {
-  def interpret(context: Context) = println(expr eval context toString)
+  def interpret(context: Context) = print(expr eval context toString)
 }
 case class Module(name:String, functions:List[Function]){
   def run() = functions.head.call(new Context(this), Nil)

@@ -6,5 +6,6 @@ object TestMain {
     Main.main(Array("/home/karol/IdeaProjects/Fimpp/examples/hello.fimpp"))
     Main.main(Array("/home/karol/IdeaProjects/Fimpp/examples/eratosthenes.fimpp"))
     Main.main(Array("/home/karol/IdeaProjects/Fimpp/examples/gcd.fimpp"))
+    Main.main(Array("/home/karol/IdeaProjects/Fimpp/examples/bf.fimpp"))
   }
 }

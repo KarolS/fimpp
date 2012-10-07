@@ -13,6 +13,9 @@ object BuiltInConstants {
   def apply(targetMap: mutable.Map[String,RuntimeValue]){
     targetMap ++= Map(
       "new line" -> RuntimeString("\n"),
+      "apostrophe" -> RuntimeString("\'"),
+      "quote" -> RuntimeString("\""),
+      "tabulation" -> RuntimeString("\t"),
       "harmony" -> RuntimeBoolean(true),
       "chaos" -> RuntimeBoolean(false)
     )

@@ -28,6 +28,15 @@ Equality
 
 In future releases, the form using the word "element" might be restricted to boolean values.
 
+Testing for nothing
+----------------
+
+    <expression> (is|are|was|were) nothing
+    <expression> (is|are|was|were) nopony
+    <expression> (is|are|was|were) something
+    <expression> (is|are|was|were) somepony
+    
+
 Alternative
 ----------
 

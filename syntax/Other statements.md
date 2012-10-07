@@ -6,7 +6,9 @@ In all examples below, parts in braces {...} are optional, and parts in parenthe
 Output
 -----
 
-    I (wrote|said|sang) {(that|,|:)} <expression> .
+    I {quickly} (wrote|said|sang) {(that|,|:)} <expression> .
+    
+If there is no "quickly", a new line is added.
 
 Standalone comment
 ----------------

@@ -18,7 +18,9 @@ object BuiltInFunctions {
       "quotient" -> RuntimeBuiltin(quotient _),
       "remainder" -> RuntimeBuiltin(remainder _),
       "dictionary" -> RuntimeBuiltin(dictionary _),
-      "first" -> RuntimeBuiltin(first _)
+      "letters" -> RuntimeBuiltin(letters _),
+      "first" -> RuntimeBuiltin(first _),
+      "character by code" -> RuntimeBuiltin(characterByCode _)
     )
   }
   def sum(args: List[RuntimeValue]) = {
@@ -64,5 +66,16 @@ object BuiltInFunctions {
     }
     case List(array:RuntimeArray) => array.get(1)
     case _ => throw new FimException("Trying to get a first element from something that is neither list nor book")
+  }
+  def letters(args: List[RuntimeValue]) = args match {
+    case List(RuntimeString(l)) =>
+      val result = RuntimeArray()
+      for (x<-l) result.array += RuntimeString(x.toString)
+      result
+    case _ => throw new FimException("You can extract letters from only one string")
+  }
+  def characterByCode(args: List[RuntimeValue]) = args match {
+    case List(RuntimeNumber(l)) => RuntimeString(l.toChar.toString)
+    case _ => throw new FimException("This is not a code of any character")
   }
 }

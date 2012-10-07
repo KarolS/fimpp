@@ -108,6 +108,8 @@ object FimppParser extends RegexParsers {
     expression~condOperator~expression ^^ {case e1~op~e2 => Relational(e1,op,e2)}
       | altkw("everything","everypony")~>kw("in")~>expression~condOperator~expression ^^ {case e1~op~e2 => Relational(e1,"all"+op,e2)}
       | altkw("anything","anypony")~>kw("in")~>expression~condOperator~expression ^^ {case e1~op~e2 => Relational(e1,"any"+op,e2)}
+      | expression<~(isOrAre~altkw("nothing","nopony")) ^^ {e => Relational(e,"=", NullValue)}
+      | expression<~(isOrAre~altkw("something","somepony")) ^^ {e => Relational(e,"!=", NullValue)}
     )
   def hasOrHave:Parser[Unit] = altkw("has","have","had")
   def isOrAre:Parser[Unit] = altkw("is","are","was","were")
@@ -196,7 +198,14 @@ object FimppParser extends RegexParsers {
       case who~function~args => Assignment(who,FunctionCallEach(function,args))
     }
     )
-  def printStat: Parser[PrintStat] = kw("i")~>altkw("sang","wrote","said")~>opt(kw("that")|comma|":")~>expression<~sentenceEnd ^^ {e=>PrintStat(e)}
+  def printStat: Parser[PrintStat] =(
+    (kw("i")~>opt(kw("quickly")))
+      ~ (altkw("sang","wrote","said")~>opt(kw("that")|comma|":")~>expression<~sentenceEnd)
+      ^^ {
+        case Some(_)~e=> PrintStat(e)
+        case None~e=> PrintStat(Concatenation(List(e,StringValue("\n"))))
+      }
+    )
   def commentStat: Parser[Statement] = kw("by the way")~commentContent~sentenceEnd ^^^ NopStat
   def arrayAssignment: Parser[ArrayAssignment] = (
     (kw("on")~>ordinalExpression)
