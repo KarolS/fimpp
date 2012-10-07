@@ -37,8 +37,8 @@ object FimppParser extends RegexParsers {
     case Seq(str) => kw(str) ^^^ ()
     case _ => (kw(strs.head) | altkw(strs.tail:_*)) ^^^ ()
   }
-  def rawWord: Parser[String] = ("""[A-Za-z]+('[a-z]+)?""".r)
-  def word: Parser[String] = ("""[A-Za-z]+('[a-z]+)?""".r) ^? ({
+  def rawWord: Parser[String] = ("""[A-Za-z]+(-[A-Za-z]+)*('[A-Za-z]+(-[A-Za-z]+)*)?""".r)
+  def word: Parser[String] = rawWord ^? ({
     case word if !keywords.contains(word) =>
       if(word.toLowerCase=="friendship") "magic" else word.toLowerCase
   },{ case notAWord =>
@@ -63,8 +63,8 @@ object FimppParser extends RegexParsers {
     | opt(kw("the?","number"))~>word ^? {case word if numbers.contains(word) => numbers.indexOf(word).toLong}
     ) //TODO
   def ordinalLiteral: Parser[Long] = (
-      (opt("the") ~> """[0-9]+""".r <~ """(?i)(st|th|nd|rd)\b""".r) ^^ {s=>s.toLong}
-        | word ^? {case word if ordinals.contains(word) => ordinals.indexOf(word).toLong}
+      (kw("the?") ~> """[0-9]+""".r <~ """(?i)(st|th|nd|rd)\b""".r) ^^ {s=>s.toLong}
+        | kw("the?") ~> word ^? {case word if ordinals.contains(word) => ordinals.indexOf(word).toLong}
       ) //TODO
 
   def stringLiteral: Parser[Expr] = "\"[^\"]*\"".r ^^ {sl =>
@@ -173,8 +173,8 @@ object FimppParser extends RegexParsers {
     kw("yes")~>comma~>opt(kw("i","mean"))~>kw("that")~>identifier<~sentenceEnd ^^ {i=>GlobalDeclStat(i)}
     )
   def callFunctionStat: Parser[ExprStat] = (
-    kw("i","also?")~>altkw("did","made","caused")~>identifier~kw("of")~arglist<~sentenceEnd ^^{
-      case id~_~lArgs => ExprStat(FunctionCall(id, lArgs))
+    kw("i","also?")~>altkw("did","made","caused")~>identifier~opt(kw("of")~>arglist)<~sentenceEnd ^^{
+      case id~lArgs => ExprStat(FunctionCall(id, lArgs.getOrElse(Nil)))
     }
     )
   def callFunctionEachStat: Parser[ExprStat] = (
@@ -185,8 +185,8 @@ object FimppParser extends RegexParsers {
   def functionCallAssign: Parser[Assignment] = (
     identifier
       ~ (altkw("did","made")~>opt(altkw("a","an","the")) ~> identifier)
-      ~ (kw("of")~> arglist <~sentenceEnd) ^^{
-        case who~function~args => Assignment(who,FunctionCall(function,args))
+      ~ (opt(kw("of")~> arglist) <~sentenceEnd) ^^{
+        case who~function~args => Assignment(who,FunctionCall(function,args.getOrElse(Nil)))
       }
     )
   def functionCallEachAssign: Parser[Assignment] = (
