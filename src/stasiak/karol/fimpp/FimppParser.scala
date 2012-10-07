@@ -11,7 +11,7 @@ object FimppParser extends RegexParsers {
       "like","when","had","was","were","in","of","on","today","made")                 //TODO
   val numbers = List("zero","one","two","three","four","five","six","seven","eight","nine","ten","eleven","twelve")
   val ordinals = List(null, "first","second","third","fourth","fifth","sixth","seventh","eighth","ninth","tenth","eleventh","twelfth")
-
+  val articles = Set("a","an","the")
   def fullStop: Parser[Unit] = opt(comma~kw("because")~commentContent)~"." ^^^ ()
   def headerEnd: Parser[Unit] = opt(comma~kw("because")~commentContent)~("."|":") ^^^ ()
   def sentenceEnd: Parser[Unit] = opt(comma~kw("because")~commentContent)~("."|"!") ^^^ ()
@@ -46,7 +46,7 @@ object FimppParser extends RegexParsers {
   })
 
   def rawIdentifier: Parser[String] = rep1(rawWord) ^^ {l=>l.mkString(" ")}
-  def identifier: Parser[String] = rep1(word) ^^ {l=>l.mkString(" ")}  //TODO: the/a/an
+  def identifier: Parser[String] = rep1(word) ^^ {l=>l.filterNot {articles.contains(_)}.mkString(" ")}
 
   def listOfIdentifiers: Parser[List[String]] = (
     identifier~opt(comma)~and~identifier ^^ {case a~_~_~b => List(a,b)}
@@ -135,7 +135,7 @@ object FimppParser extends RegexParsers {
     ~ altkw("likes","is","like","are")
     ~expression<~ questionEnd
     ^^ {
-      case i~_~e=> Assignment(i,e);
+      case i~_~e=> Assignment(i,e)
     })
   def ifStat: Parser[IfStat] = (
     (kw("when") ~> condition <~ headerEnd)

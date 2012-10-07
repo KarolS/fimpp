@@ -1,9 +1,11 @@
 *.class
 *.log
+*.iml
 
 # sbt specific
 dist/*
 target/
+out/
 lib_managed/
 src_managed/
 project/boot/
