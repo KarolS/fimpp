@@ -7,7 +7,7 @@ In FIM++, any sequence of words can be an identifier, except of those containing
 
 about, and, are, did, either, got, had, has, have, I, in, is, like, likes, made, me, my, of, on, only, or, today, was, were, what, when, with, yes
 
-The list above might grow in future releases. The only exception are module names: they can contain whatever words you like.
+The list above might grow in future releases. The only exception are module names and Java class names: they can contain whatever words you like.
 
 Identifiers are not case sensitive. Also, words a/an/the are stripped from the identifiers during the parsing phase (so identifiers "the Cutie Mark Crusaders" and "CUTIE MARK CRUSADERS" are considered identical).
 

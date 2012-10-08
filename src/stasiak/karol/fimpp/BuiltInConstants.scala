@@ -16,6 +16,7 @@ object BuiltInConstants {
       "apostrophe" -> RuntimeString("\'"),
       "quote" -> RuntimeString("\""),
       "tabulation" -> RuntimeString("\t"),
+      "nothing" -> RuntimeNull,
       "harmony" -> RuntimeBoolean(true),
       "chaos" -> RuntimeBoolean(false)
     )

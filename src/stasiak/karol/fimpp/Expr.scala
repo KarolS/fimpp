@@ -12,6 +12,9 @@ case class NumberValue(value: Long)  extends Expr {
 case class StringValue(value: String) extends Expr {
   def eval(context:Context) = RuntimeString(value)
 }
+case class BooleanValue(b: Boolean) extends Expr {
+  def eval(context:Context) = RuntimeBoolean(b)
+}
 case class Concatenation(exprs: List[Expr]) extends Expr {
   def eval(context:Context) = RuntimeString(exprs.map(_.eval(context).toString).mkString(""))
 }

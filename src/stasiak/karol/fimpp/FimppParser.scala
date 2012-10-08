@@ -8,7 +8,7 @@ object FimppParser extends RegexParsers {
   val keywords =
     Set("yes","and","got","i","my","me","with","about", "I",
       "either","or","has","is","have","are","likes","did","only", "what",
-      "like","when","had","was","were","in","of","on","today","made")                 //TODO
+      "like","when","had","was","were","in","of","on","today","made","if")                 //TODO
   val numbers = List("zero","one","two","three","four","five","six","seven","eight","nine","ten","eleven","twelve")
   val ordinals = List(null, "first","second","third","fourth","fifth","sixth","seventh","eighth","ninth","tenth","eleventh","twelfth")
   val articles = Set("a","an","the")
@@ -198,6 +198,53 @@ object FimppParser extends RegexParsers {
       case who~function~args => Assignment(who,FunctionCallEach(function,args))
     }
     )
+  def classImportStat: Parser[Statement] = (kw("i","enchanted")~>identifier)~(kw("with")~>rep(rawWord)<~sentenceEnd) ^^{
+    case id~cl => ClassImportStat(id,cl)
+  }
+  def constructorCall: Parser[Statement] = (
+    (kw("i","woke","up")~>identifier)
+      ~ (kw("with")~>identifier)
+    ~ opt(kw("and")~>arglist)
+      <~sentenceEnd ^^{
+      case variable~clazz~args => ConstructorCall(Some(variable),clazz,args.getOrElse(Nil))
+    } )
+  def methodCallBranches:Parser[(Option[String],Option[String]) => MethodCall] = (
+    (kw("about")~>arglist)~(altkw("so","what","when","if")~>opt(altkw("they","she","he","it"))~>rawIdentifier) ^^{
+      case args~method => (a:Option[String],b:Option[String])=> MethodCall(a,b,method,args)
+    }
+      | (kw("about")~>identifier)~(kw("made")~>rawIdentifier) ^^{
+      case arg~method => (a:Option[String],b:Option[String])=>MethodCall(a,b,"set "+method,List(VariableValue(arg), BooleanValue(true)))
+    }
+      | (kw("about")~>identifier)~(kw("with")~>arglist)~(kw("of")~>rawIdentifier) ^^{
+      case arg~args~method => (a:Option[String],b:Option[String])=>MethodCall(a,b,"set "+method,VariableValue(arg)::args)
+    }
+      | (altkw("what","if")~>identifier)~opt(kw("with")~>arglist)~((isOrAre|hasOrHave)~>rawIdentifier) ^^{
+      case arg~args~method => (a:Option[String],b:Option[String])=>MethodCall(a,b,"? "+method,VariableValue(arg)::(args.getOrElse(Nil)))
+    }
+    )
+  def methodCall: Parser[Statement] = (
+    opt(kw("i","told")~>identifier)
+    ~ (kw("i","asked")~>opt(identifier))
+    ~ methodCallBranches
+      <~sentenceEnd
+    )^^{
+    case ret~cl~f => f(ret,cl)
+    }
+  def fieldSetStat: Parser[Statement] = (
+    (kw("i")~>altkw("gave","sold")~>expression)
+      ~(kw("to")~>simpleExpression)
+      ~(kw("of")~>identifier)<~sentenceEnd ^^ {
+      case value~field~obj=>FieldAssignment(obj,field,value)
+    }
+    )
+  def fieldGetStat: Parser[Statement] = (
+    (kw("i")~>altkw("took","got","stole")~>simpleExpression)
+      ~(kw("of")~>identifier)
+      ~ (kw("and","i?","gave")~>altkw("it","them","her","him")~>kw("to")~>identifier)
+      <~sentenceEnd^^ {
+    case field~obj~otherVar=>FieldRetrieval(obj,field,otherVar)
+    }
+    )
   def printStat: Parser[PrintStat] =(
     (kw("i")~>opt(kw("quickly")))
       ~ (altkw("sang","wrote","said")~>opt(kw("that")|comma|":")~>expression<~sentenceEnd)
@@ -236,6 +283,8 @@ object FimppParser extends RegexParsers {
       | printStat | globalDeclStat
       | arrayInit | arrayRetrieval
       | commentStat
+      | classImportStat | methodCall | constructorCall
+      | fieldGetStat | fieldSetStat
       | functionCallAssign | functionCallEachAssign //these two have to be here
       | increment    //increment has to be the last one!
     )

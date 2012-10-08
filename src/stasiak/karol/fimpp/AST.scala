@@ -11,7 +11,71 @@ case class Function(name:String, argNames:List[String], body:List[Statement], re
 }
 
 sealed trait Statement{
-  def interpret(context: Context)
+  def interpret(context: Context): Unit
+}
+case class ClassImportStat(variable: String, id: List[String])  extends Statement {
+  def interpret(context: Context) {
+    context.set(variable, RuntimeClass(JavaInterop.loadClass(id)))
+  }
+}
+case class MethodCall(returnTo: Option[String], clazz: Option[String], id: String, args: List[Expr]) extends Statement {
+  def interpret(context: Context) {
+    clazz match {
+      case Some(cla) =>
+        context get cla match {
+          case RuntimeClass(cl)=>
+            val result = JavaInterop.callMethod(context, cl, id, args.map(_ eval context))
+            returnTo foreach { context.set(_, result) }
+          case _ => throw new FimException("‘"+cla+"’ is not a class")
+        }
+      case None =>
+        val evaluatedArgs = args.map(_ eval context)
+        if(args.isEmpty) throw new FimException("I have no idea what to do")
+        if(evaluatedArgs.head == null) throw new FimException("There's nothing here")
+        val result = JavaInterop.callMethod(context, evaluatedArgs.head.toJava.getClass, id, evaluatedArgs)
+        returnTo foreach { context.set(_, result) }
+    }
+  }
+}
+case class ConstructorCall(returnTo: Option[String], clazz: String, args: List[Expr]) extends Statement {
+  def interpret(context: Context) {
+    context get clazz match {
+      case RuntimeClass(cl)=>
+        val result = JavaInterop.callConstructor(context, cl, args.map(_ eval context))
+        returnTo foreach { context.set(_, result) }
+      case _ => throw new FimException("‘"+clazz+"’ is not a class")
+    }
+  }
+}
+case class FieldAssignment(objClass: String, field: Expr, value: Expr) extends Statement {
+  def interpret(context: Context) {
+    val oc = context get objClass
+    val v = value eval context
+    (oc,field) match {
+      case (RuntimeClass(cl),VariableValue(n)) => JavaInterop.setField(context, Left(cl), Right(n),v)
+      case (RuntimeClass(cl),NumberValue(n)) => JavaInterop.setField(context, Left(cl), Left(n.toInt),v)
+      case (RuntimeJavaObject(w),VariableValue(n)) => JavaInterop.setField(context, Right(w), Right(n),v)
+      case (RuntimeJavaObject(w),NumberValue(n)) => JavaInterop.setField(context, Right(w), Left(n.toInt),v)
+      case _ => throw new FimException("TODO")
+    }
+  }
+}
+case class FieldRetrieval(objClass: String, field: Expr, otherVar: String) extends Statement {
+  def interpret(context: Context) {
+    val oc = context get objClass
+    val result = (oc,field) match {
+      case (RuntimeClass(cl),VariableValue(n)) => JavaInterop.getField(Left(cl), Right(n))
+      case (RuntimeClass(cl),StringValue(n)) => JavaInterop.getField(Left(cl), Right(n))
+      case (RuntimeClass(cl),Concatenation(List(StringValue(n)))) => JavaInterop.getField(Left(cl), Right(n))
+      case (RuntimeClass(cl),NumberValue(n)) => JavaInterop.getField(Left(cl), Left(n.toInt))
+      case (RuntimeJavaObject(v),VariableValue(n)) => JavaInterop.getField(Right(v), Right(n))
+      case (RuntimeJavaObject(v),StringValue(n)) => JavaInterop.getField(Right(v), Right(n))
+      case (RuntimeJavaObject(v),Concatenation(List(StringValue(n)))) => JavaInterop.getField(Right(v), Right(n))
+      case (RuntimeJavaObject(v),NumberValue(n)) => JavaInterop.getField(Right(v), Left(n.toInt))
+      case _ => throw new FimException("TODO: "+oc+" "+field)
+    }
+    context.set(otherVar, result)
+  }
 }
 case class Assignment(variable: String, value: Expr) extends Statement {
   def interpret(context: Context) {
