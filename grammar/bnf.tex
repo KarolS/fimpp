@@ -1,0 +1,212 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{url}
+\usepackage{verbatim}
+\usepackage{indentfirst}
+\usepackage{mdwtools/syntax}
+\usepackage{float}
+\floatstyle{boxed} 
+\restylefloat{figure}
+
+\title{FiM++ formal grammar}
+\author{Karol Stasiak}
+\date{October 2012}
+
+\begin{document}
+
+\section{Identifiers}
+
+\begin{grammar}
+<word> ::= <Letter> \{ ["'"  | "-" ] <Letter>  \} 
+
+<identifier> ::= <word> \{ <word> \}
+
+<java-identifier> ::= <word> \{ <word> \}
+
+<list-of-identifiers> ::= <identifier> \alt <identifier> [","] "and" <identifier> \alt <identifier> "," <list-of-identifiers>
+\end{grammar}
+
+\section{Literals}
+
+\begin{grammar}
+
+<number> ::= "zero" | "one" | ... | "twelve" | <Digit> \{ <Digit> \}
+
+<ordinal-literal> ::= ["the"] ("first" | ... | "twelfth" | <number> ("st"|"nd"|"rd"|"th"))
+
+<string-literal> ::= <Double-Quote> \{ <Non-Quote-Character> \{ <Non-Quote-Character> \} | <Single-Quote> <expression> <Single-Quote> \} <Double-Quote>
+
+<literal> ::= <number> | <string-literal>
+\end{grammar}
+
+\section{Expressions}
+
+\begin{grammar}
+
+<simple-expression> ::= <literal> | <identifier>
+
+<list-expression> ::= <simple-expression> [","] "and" <simple-expression> \alt <simple-expression> "," <list-expression>
+
+<expression> ::= <list-expression> \alt "only" <simple-expression> \alt <simple-expression>
+
+<argument-list> ::= <simple-expression> \alt <simple-expression> [","] "and" <simple-expression> \alt <simple-expression> "," <argument-list>
+
+<ordinal-expression> ::= <ordinal-literal> "page" \alt "page numbered by" <identifier>
+
+\end{grammar}
+
+\section{Auxiliary words}
+
+\begin{grammar}
+
+<does> ::= "does" | "do" | "did" 
+
+<is> ::= "is" | "are" | "was" | "were"
+
+<has> ::= "has" | "have" | "had"
+
+<is-or-likes> ::= "is" | "are" | "likes" | "like"
+
+<pronoun> ::= "he" | "she" | "it" | "they"
+
+<pronoun-o> ::= "him" | "her" | "it" | "them"
+
+\end{grammar}
+
+\section{Conditions}
+
+\begin{grammar}
+
+<simple-condition> ::= <expression> <conditional-operator> <expression>
+  \alt ("everypony" | "everything") "in" <expression> <conditional-operator> <expression>
+  \alt ("anypony" | "anything") "in" <expression> <conditional-operator> <expression>
+  \alt <expression> <is> ("nothing" | "nopony")
+  \alt <expression> <is> ("something" | "somepony")
+  
+<conditional-operator> ::= <has> "less" "than"
+  \alt <has> "more than"
+  \alt <has> "not less than"
+  \alt <has> "not more than"
+  \alt <is> "equal to"
+  \alt <is> "not equal to"
+  \alt <is> (["an"] "element" | "elements") "of" 
+  \alt <is> "not" (["an"] "element" | "elements") "of" 
+
+
+\end{grammar}
+
+\section{Punctuation}
+
+\begin{grammar}
+
+<inline-comment> ::= ", because" \{ <Almost-Anything> \}
+
+<sentence-end> ::= [<inline-comment>] ("."|"!")
+
+<header-end> ::= [<inline-comment>] ("."|":")
+
+<question-end> ::= [<inline-comment>] ("?")
+
+\end{grammar}
+
+\section{Statements}
+
+\begin{grammar}
+
+<increment-s> ::= <identifier> "got" <number> ("more" |"less"|"fewer") <sentence-end>
+
+<assignment-s> ::= "Did you know" ["that"] <identifier> <is-or-likes> <expression> <question-end>
+
+<if-s> ::= "When" <condition> <header-end> \\ \{ <statement> \} 
+  ["In the end, I did this instead" <header-end> \\ \{ <statement> \} ]
+  "That's what I did" <sentence-end>
+
+<while-s> ::= "I did this while" <condition> <header-end> \\
+  \{ <statement> \}
+  [ "It didn't work, but I knew why" <header-end> \\ \{ <statement> \} ]
+  [ "In the end, I did this instead" <header-end> \\ \{ <statement> \} ]\\
+  "That's what I did" <sentence-end>
+  
+<repeat-s> ::= "I did this" [<number> "times"|"once"]  <header-end>\\
+  \{ <statement> \} 
+  [ "It didn't work, but I knew why" <header-end> \\ \{ <statement> \} ]
+  [ "In the end, I did this instead" <header-end> \\ \{ <statement> \} ]\\
+  "That's what I did" <sentence-end>
+
+<global-declaration-s> ::= "Yes," ["I mean"] "that" <identifier> <sentence-end>
+
+<call-function-s> ::= "I" ["also"] ("did"|"made"|"caused") <identifier> "of" <argument-list> <sentence-end>
+
+<call-function-each-s> ::= "I" ["also"] ("did"|"made"|"caused") <identifier> "of each"["of"] <argument-list> <sentence-end>
+
+<call-function-and-assign-s> ::= <identifier> ("did"|"made") <identifier>\\"of" <argument-list> <sentence-end>
+
+<call-function-each-and-assign-s> ::= <identifier> ("did"|"made") <identifier>\\"of each"["of"] <argument-list> <sentence-end>
+
+<java-class-import-s> ::= "I enchanted" <identifier> "with" <java-identifier> <sentence-end>
+
+<java-constructor-call-s> ::= "I woke up" <identifier>\\"with" <identifier> "and" <argument-list> <sentence-end>
+
+<java-method-call-s> ::= ["I told" <identifier>] "I asked" [<identifier>]\\ <java-method-invocation> <sentence-end>
+
+<java-method-invocation> ::= "about" <argument-list> ("so"|"if"|"what"|"how") [<pronoun>] <java-identifier> 
+  \alt "about" <identifier> "made" <java-identifier>
+  \alt "about" <identifier> "with"<argument-list> "of" <java-identifier>
+  \alt ("what"|"if") <identifier> ["with" <argument-list>] (<is>|<has>) <java-identifier>
+  
+<java-field-set-s> ::= "I" ("gave"|"sold") <expression> "to" <simple-expression> "of" <identifier> <sentence-end>
+
+<java-field-get-s> ::= "I" ("took"|"got"|"stole") <simple-expression> "of" <identifier> "and" ["I"] "gave" <pronoun-o> "to" <identifier> <sentence-end>
+
+<print-s> ::= "I" ["quickly"] ("said"|"sang"|"wrote") ["that"|","|":"]\\<expression> <sentence-end>
+
+<comment-s> ::= "By the way," <Almost-Anything>  <sentence-end>
+
+<array-assignment-s> ::= "On" <ordinal-expression> "of" ["the"] ["book"] <identifier>\\"I" ("wrote"|"scribbled"|"noted") ["about"|"what I knew about"] <expression> <sentence-end>
+
+<array-retrieval-s> ::= "On" <ordinal-expression> "of" ["the"] ["book"] <identifier>\\"I read about" <identifier> <sentence-end>
+
+<array-init-s> ::= ["Today"] "I found a book" ("named"|"titled") <identifier> ["today"] <sentence-end>
+
+<statement> ::= <array-init-s>|<array-retrieval-s>|<array-assignment-s>
+  \alt <comment-s>|<print-s>
+  \alt <java-field-get-s>|<java-field-set-s>
+  \alt <java-method-call-s>|<java-constructor-call-s>|<java-class-import-s>
+  \alt <call-function-each-and-assign-s>|<call-function-and-assign-s>
+  \alt <call-function-each-s>|<call-function-s>
+  \alt <global-declaration-s>|<repeat-s>|<while-s>|<if-s>
+  \alt <assignment-s>|<increment-s>
+  
+\end{grammar}
+
+\section{Functions}
+\begin{grammar}
+
+<function> ::= "I learned" ["about"] <identifier> ["with" <list-of-identifiers>] <header-end> \\
+  \{<statement>\} \\
+  "That's about" <identifier> ["with" <identifier>] <sentence-end>
+
+<main-function> ::= "Today I learned" [["about"] <identifier>] <header-end> \\
+  \{<statement>\} \\
+  "Your faithful student," <identifier> [<sentence-end>]
+
+\end{grammar}
+
+\section{Modules}
+\begin{grammar}
+
+<c-style-module> ::= "Dear Princess Celestia:" <identifier> <header-end> \\
+	\{ <function> \} \\
+	<main-function>
+
+<wrapped-module> ::= "Dear Princess Celestia:" <identifier> <header-end> \\
+	"Today I learned" ["about"] <identifier> <header-end> \\
+	\{ <function> \}\\
+	"Your faithful student," <identifier> [<sentence-end>]
+	
+<program> ::= <c-style-module> | <wrapped-module>
+
+\end{grammar}
+
+
+\end{document}
