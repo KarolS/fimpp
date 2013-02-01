@@ -2,6 +2,7 @@
 *.log
 *.iml
 *.*~
+Makefile~
 
 # sbt specific
 dist/*
