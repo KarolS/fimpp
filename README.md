@@ -3,6 +3,8 @@ fimpp
 
 FIM++ interpreter, released under GNU General Public License 3.
 
+**The project is no longer maintained. For a more recent version, see this fork: https://github.com/avian2/fimpp**
+
 Inspired by [this Equestria Daily post](http://www.equestriadaily.com/2012/10/editorial-fim-pony-programming-language.html) and [this DeviantArt sample program and some comments below it](http://deftcrow.deviantart.com/art/FiM-Programming-Hello-World-99-Jugs-of-Cider-330736334).
 
 FIM++ is imperative, dynamically-typed, interpreted language. Currently, it supports integer arithmetic, console output, dynamically growing arrays, and subroutines.
